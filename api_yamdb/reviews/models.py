@@ -1,5 +1,7 @@
 from django.db import models
 
+from reviews.validators import validate_year
+
 
 class Genre(models.Model):
     name = models.CharField(
@@ -43,16 +45,14 @@ class Category(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=256,
-        verbose_name='Название произведения'
+        max_length=256, verbose_name='Название произведения'
     )
     year = models.IntegerField(
         verbose_name='Год',
+        validators=(validate_year,),
     )
     description = models.TextField(
-        verbose_name='Описание',
-        blank=True,
-        null=True
+        verbose_name='Описание', blank=True, null=True
     )
     genre = models.ManyToManyField(
         Genre,
@@ -90,3 +90,7 @@ class TitleGenre(models.Model):
 
     def __str__(self):
         return f'{self.title}, жанр - {self.genre}'
+
+    class Meta:
+        verbose_name = 'Произведение с жанром'
+        verbose_name_plural = 'Произведения с жанрами'

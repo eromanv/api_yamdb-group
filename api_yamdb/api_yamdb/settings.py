@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djoser',
     'rest_framework_simplejwt',
     'api',
 ]
@@ -117,4 +119,15 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+DJOSER = {
+    'SEND ACTIVATION E-MAIL': False,
+    'TOKEN MODEL': None,
+    'ACTIVATION_URL': 'auth/{token}/',
+}
 AUTH_USER_MODEL = 'api.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
+
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')

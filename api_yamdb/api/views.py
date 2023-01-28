@@ -3,16 +3,16 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
-from rest_framework import permissions, status, viewsets, filters
+from rest_framework import permissions, status, viewsets, filters, generics
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .models import User, Category, Genre, Title
-from .permissions import (IsAdmin)
+from reviews.models import Category, Genre, Title, Review, User
+from .permissions import (IsAdmin, IsAdminOwnerModeratorOrReadOnly)
 from .serializers import (RegisterDataSerializer, TokenSerializer,
-                          UserEditSerializer, UserSerializer)
+                          UserEditSerializer, UserSerializer, ReviewSerializer, CommentSerializer)
 
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
@@ -134,4 +134,43 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('list', 'retrieve'):
             return TitleReadSerializer
         return TitleWriteSerializer
+    
 
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOwnerModeratorOrReadOnly, )
+
+    def get_queryset(self):
+        title = generics.get_object_or_404(
+            Title,
+            id=self.kwargs.get("title_id")
+        )
+        return title.reviews.select_related("author").all()
+    
+    def perform_create(self, serializer):
+        title = generics.get_object_or_404(
+            Title,
+            id=self.kwargs.get("title_id")
+        )
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOwnerModeratorOrReadOnly, )
+
+    def get_queryset(self):
+        review = generics.get_object_or_404(
+            Review,
+            id=self.kwargs.get("review_id")
+        )
+        return review.comments.select_related("author").all()
+    
+    def perform_create(self, serializer):
+        review = generics.get_object_or_404(
+            Review,
+            id=self.kwargs.get("review_id")
+        )
+        serializer.save(author=self.request.user, review=review)

@@ -1,6 +1,6 @@
-from pathlib import Path
-from datetime import timedelta
 import os
+from datetime import timedelta
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -93,10 +93,9 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 DJOSER = {
@@ -104,6 +103,7 @@ DJOSER = {
     'TOKEN MODEL': None,
     'ACTIVATION_URL': 'auth/{token}/',
 }
+
 AUTH_USER_MODEL = 'reviews.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
@@ -122,4 +122,3 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
-

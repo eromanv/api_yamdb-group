@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 from reviews.validators import validate_year
 
@@ -14,40 +14,33 @@ class User(AbstractUser):
         (MODERATOR, 'Moderator'),
         (USER, 'User'),
     ]
-
+    username = models.CharField(
+        verbose_name='Имя пользователя (nickname)',
+        max_length=150,
+        null=True,
+        unique=True,
+    )
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
         unique=True,
         max_length=254,
     )
-    username = models.CharField(
-        verbose_name='Имя пользователя (nickname)',
-        max_length=150,
-        null=True,
-        unique=True
+    role = models.CharField(
+        verbose_name='Вид доступа',
+        max_length=50,
+        choices=ROLES,
+        default=USER,
     )
+    bio = models.TextField(verbose_name='О себе', null=True, blank=True)
     first_name = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
         null=True,
-        unique=True
     )
     last_name = models.CharField(
         verbose_name='Фамилия пользователя',
         max_length=150,
         null=True,
-        unique=True
-    )
-    role = models.CharField(
-        verbose_name='Вид доступа',
-        max_length=50,
-        choices=ROLES,
-        default=USER
-    )
-    bio = models.TextField(
-        verbose_name='О себе',
-        null=True,
-        blank=True
     )
 
     @property
@@ -68,9 +61,9 @@ class User(AbstractUser):
 
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(username__iexact="me"),
-                name="username_is_not_me"
-            )
+                check=~models.Q(username__iexact='me'),
+                name='username_is_not_me',
+            ),
         ]
 
 
@@ -123,6 +116,13 @@ class Title(models.Model):
         verbose_name='Год',
         validators=(validate_year,),
     )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='title',
+        verbose_name='Категория произведения',
+        null=True,
+    )
     description = models.TextField(
         verbose_name='Описание',
         blank=True,
@@ -132,13 +132,6 @@ class Title(models.Model):
         Genre,
         verbose_name='Жанр',
         through='TitleGenre',
-    )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        related_name='title',
-        verbose_name='Категория произведения',
-        null=True,
     )
 
     def __str__(self):
@@ -182,41 +175,44 @@ class Review(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     score = models.PositiveIntegerField(
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
-        ]
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        db_index=True
-    )
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return self.text
 
     class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(
                 fields=('author', 'title'),
-                name='unique_author_title_in_review'
-            )
+                name='unique_author_title_in_review',
+            ),
         ]
 
 
 class Comment(models.Model):
     text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
     review = models.ForeignKey(
         Review,
         related_name='comments',
         on_delete=models.CASCADE,
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments'
-    )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        db_index=True
-    )
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

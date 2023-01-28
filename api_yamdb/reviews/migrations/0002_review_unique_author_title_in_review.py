@@ -12,6 +12,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='review',
-            constraint=models.UniqueConstraint(fields=('author', 'title'), name='unique_author_title_in_review'),
+            constraint=models.UniqueConstraint(
+                fields=('author', 'title'),
+                name='unique_author_title_in_review',
+            ),
         ),
     ]

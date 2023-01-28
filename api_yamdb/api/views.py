@@ -11,24 +11,24 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filters import TitleFilter
 from api.mixins import ListCreateDestroyViewSet
-from api.permissions import IsAdminUserOrReadOnly
+from api.permissions import (
+    IsAdmin,
+    IsAdminOwnerModeratorOrReadOnly,
+    IsAdminUserOrReadOnly,
+)
 from api.serializers import (
     CategorySerializer,
-    GenreSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer,
-)
-from reviews.models import Category, Genre, Review, Title, User
-
-from api.permissions import IsAdmin, IsAdminOwnerModeratorOrReadOnly
-from api.serializers import (
     CommentSerializer,
+    GenreSerializer,
     RegisterDataSerializer,
     ReviewSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
     TokenSerializer,
     UserEditSerializer,
     UserSerializer,
 )
+from reviews.models import Category, Genre, Review, Title, User
 
 
 @api_view(['POST'])
@@ -125,7 +125,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
     serializer_class = TitleWriteSerializer
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)

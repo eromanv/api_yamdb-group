@@ -122,6 +122,7 @@ class Title(models.Model):
         related_name='title',
         verbose_name='Категория произведения',
         null=True,
+        blank=True,
     )
     description = models.TextField(
         verbose_name='Описание',
@@ -132,6 +133,11 @@ class Title(models.Model):
         Genre,
         verbose_name='Жанр',
         through='TitleGenre',
+    )
+    rating = models.IntegerField(
+        verbose_name='Рейтинг',
+        null=True,
+        default=None,
     )
 
     def __str__(self):
@@ -166,18 +172,18 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField()
     title = models.ForeignKey(
         Title,
         related_name='reviews',
         on_delete=models.CASCADE,
     )
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews',
     )
-    score = models.PositiveIntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -188,6 +194,7 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ('pub_date',)
         constraints = [
             models.UniqueConstraint(
                 fields=('author', 'title'),
@@ -197,16 +204,16 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        related_name='comments',
+        on_delete=models.CASCADE,
+    )
     text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
-    )
-    review = models.ForeignKey(
-        Review,
-        related_name='comments',
-        on_delete=models.CASCADE,
     )
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
@@ -216,3 +223,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ('pub_date',)

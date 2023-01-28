@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import User, Category, Genre, Title
+from reviews.models import Category, Genre, Title, Comment, Review, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -107,3 +107,38 @@ class TitleReadSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field="username",
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ("id", "text", "author", "pub_date")
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    score = serializers.IntegerField(min_value=1, max_value=10)
+    author = serializers.SlugRelatedField(
+        slug_field="username",
+        read_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ("id", "text", "author", "score", "pub_date")
+    
+    def validate(self, attrs):
+        if not self.context["request"].method == "POST":
+            return attrs
+        if Review.objects.filter(
+            title_id=self.context["view"].kwargs.get("title_id"),
+            author=self.context["request"].user
+        ).exists():
+            raise serializers.ValidationError(
+                ("Попытка оставить повторный отзыв")
+            )
+        return attrs

@@ -17,7 +17,6 @@ class User(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя (nickname)',
         max_length=150,
-        null=True,
         unique=True,
     )
     email = models.EmailField(
@@ -31,7 +30,11 @@ class User(AbstractUser):
         choices=ROLES,
         default=USER,
     )
-    bio = models.TextField(verbose_name='О себе', null=True, blank=True)
+    bio = models.TextField(
+        verbose_name='О себе', 
+        null=True, 
+        blank=True
+    )
     first_name = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
@@ -44,12 +47,16 @@ class User(AbstractUser):
     )
 
     @property
+    def is_user(self):
+        return self.role == self.USER
+
+    @property
     def is_moderator(self):
         return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN
+        return self.role == self.ADMIN or self.is_superuser
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

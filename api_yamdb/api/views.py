@@ -78,6 +78,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
 
     @action(
         methods=[

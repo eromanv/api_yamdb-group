@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
 from reviews.validators import validate_year
@@ -15,6 +15,7 @@ class User(AbstractUser):
         (USER, 'User'),
     ]
     username = models.CharField(
+        validators=(RegexValidator(r'^[\w.@+-]+\Z', message='Недопустимые символы'),),
         verbose_name='Имя пользователя (nickname)',
         max_length=150,
         unique=True,
@@ -30,11 +31,7 @@ class User(AbstractUser):
         choices=ROLES,
         default=USER,
     )
-    bio = models.TextField(
-        verbose_name='О себе', 
-        null=True, 
-        blank=True
-    )
+    bio = models.TextField(verbose_name='О себе', null=True, blank=True)
     first_name = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,

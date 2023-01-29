@@ -5,10 +5,10 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
+    username = serializers.RegexField(
         required=True,
         max_length=150,
-#        regex=r"^[^\W\d]\w*$",
+        regex=r'^[\w.@+-]+\Z',
     )
 
     class Meta:
@@ -35,16 +35,15 @@ class UserEditSerializer(serializers.ModelSerializer):
             'role',
         )
         model = User
-        max_length = 150,
-        regex = r"^[\w.@+-]+\z",
+        max_length = (150,)
         read_only_fields = ('role',)
 
 
 class RegisterDataSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
+    username = serializers.RegexField(
         validators=[UniqueValidator(queryset=User.objects.all())],
         max_length=150,
-
+        regex=r'^[\w.@+-]+\Z',
     )
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())],
@@ -53,7 +52,7 @@ class RegisterDataSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value.lower() == 'me':
-            raise serializers.ValidationError('Username "me" is not valid')
+            raise serializers.ValidationError('Недопустимое имя пользователя')
         return value
 
     class Meta:

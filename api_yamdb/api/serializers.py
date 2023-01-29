@@ -9,6 +9,9 @@ class UserSerializer(serializers.ModelSerializer):
         required=True,
         max_length=150,
         regex=r'^[\w.@+-]+\Z',
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],
     )
 
     class Meta:

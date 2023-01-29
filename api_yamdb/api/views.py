@@ -79,6 +79,7 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
 
     @action(
         methods=[

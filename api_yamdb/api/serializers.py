@@ -43,24 +43,14 @@ class UserEditSerializer(serializers.ModelSerializer):
 
 
 class RegisterDataSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        max_length=150,
-        regex=r'^[\w.@+-]+\Z',
-    )
-    email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())],
-        max_length=254,
-    )
+    class Meta:
+        model = User
+        fields = ('username', 'email')
 
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Недопустимое имя пользователя')
         return value
-
-    class Meta:
-        fields = ('username', 'email')
-        model = User
 
 
 class TokenSerializer(serializers.Serializer):

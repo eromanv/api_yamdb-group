@@ -10,9 +10,9 @@ class User(AbstractUser):
     MODERATOR = 'moderator'
     USER = 'user'
     ROLES = [
-        (ADMIN, 'Administrator'),
-        (MODERATOR, 'Moderator'),
-        (USER, 'User'),
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
+        (USER, 'user'),
     ]
     username = models.CharField(
         validators=(RegexValidator(r'^[\w.@+-]+\Z', message='Недопустимые символы'),),
@@ -55,19 +55,15 @@ class User(AbstractUser):
     def is_admin(self):
         return self.role == self.ADMIN or self.is_superuser
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
-
     class Meta:
-        ordering = ['id']
+        ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-
         constraints = [
-            models.CheckConstraint(
-                check=~models.Q(username__iexact='me'),
-                name='username_is_not_me',
-            ),
+            models.UniqueConstraint(
+                fields=('username', 'email'),
+                name='unique_user'
+            )
         ]
 
 

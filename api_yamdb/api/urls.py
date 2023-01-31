@@ -7,13 +7,14 @@ from .views import (
     GenreViewSet,
     ReviewViewSet,
     TitleViewSet,
-    UserViewSet,
-    get_jwt_token,
-    register,
+    UserMeRetrieveUpdate,
+    UserSignupViewSet,
+    UsersSettingsViewSet,
+    UserTokenViewSet,
 )
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
+router.register(r'users', UsersSettingsViewSet)
 router.register(r'categories', CategoryViewSet, basename='categories')
 router.register(r'genres', GenreViewSet, basename='genres')
 router.register(r'titles', TitleViewSet, basename='titles')
@@ -29,7 +30,8 @@ router.register(
 )
 
 urlpatterns = [
+    path('v1/auth/signup/', UserSignupViewSet.as_view()),
+    path('v1/auth/token/', UserTokenViewSet.as_view()),
+    path('v1/users/me/', UserMeRetrieveUpdate.as_view()),
     path('v1/', include(router.urls)),
-    path('v1/auth/signup/', register, name='register'),
-    path('v1/auth/token/', get_jwt_token, name='token'),
 ]

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from reviews.validators import validate_year
@@ -9,29 +9,33 @@ class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'
-    ROLES = [
+    ADMIN_ROLE = [
+        (USER, 'user'),
         (ADMIN, 'admin'),
         (MODERATOR, 'moderator'),
-        (USER, 'user'),
     ]
-    username = models.CharField(
-        validators=(RegexValidator(r'^[\w.@+-]+\Z', message='Недопустимые символы'),),
-        verbose_name='Имя пользователя (nickname)',
-        max_length=150,
-        unique=True,
-    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username',)
     email = models.EmailField(
-        verbose_name='Адрес электронной почты',
+        db_index=True,
         unique=True,
         max_length=254,
+        verbose_name='Email пользователя',
+        help_text='Укажите email пользователя',
+    )
+    bio = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Биография пользователя',
+        help_text='Напишите биографию пользователя',
     )
     role = models.CharField(
-        verbose_name='Вид доступа',
-        max_length=50,
-        choices=ROLES,
+        max_length=15,
+        choices=ADMIN_ROLE,
         default=USER,
+        verbose_name='Роль пользователя',
+        help_text='Укажите роль пользователя',
     )
-    bio = models.TextField(verbose_name='О себе', null=True, blank=True)
     first_name = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
@@ -43,28 +47,20 @@ class User(AbstractUser):
         null=True,
     )
 
+    class Meta:
+        verbose_name = 'Пользователи'
+        verbose_name_plural = 'Пользователи'
+
     @property
-    def is_user(self):
-        return self.role == self.USER
+    def is_admin(self):
+        return self.is_staff or self.role == self.ADMIN
 
     @property
     def is_moderator(self):
         return self.role == self.MODERATOR
 
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser
-
-    class Meta:
-        ordering = ('username',)
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        constraints = [
-            models.UniqueConstraint(
-                fields=('username', 'email'),
-                name='unique_user'
-            )
-        ]
+    def __str__(self):
+        return self.email
 
 
 class Genre(models.Model):

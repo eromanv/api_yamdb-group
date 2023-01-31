@@ -56,7 +56,7 @@ class UsersSettingsViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     queryset = User.objects.all()
     serializer_class = UsersSettingsSerializer
-    permission_classes = (permissions.IsAuthenticated, IsAdmin)
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -65,7 +65,7 @@ class UsersSettingsViewSet(viewsets.ModelViewSet):
 class UserSignupViewSet(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def tokensend(self, user, username, email):
+    def send_token(self, user, username, email):
         token = default_token_generator.make_token(user)
         send_mail(
             'confirmation_code',
@@ -85,7 +85,7 @@ class UserSignupViewSet(APIView):
         )
         if create:
             user.save()
-        self.tokensend(user, username, email)
+        self.send_token(user, username, email)
         return Response(
             {'username': username, 'email': email},
             status=status.HTTP_200_OK,
@@ -107,7 +107,7 @@ class UserTokenViewSet(APIView):
             token = AccessToken.for_user(user)
             return Response({'token': str(token)}, status=status.HTTP_200_OK)
         return Response(
-            {'Не удалось сформировать токен'},
+            {'Ошибка генерации токена'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

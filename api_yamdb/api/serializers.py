@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -40,52 +41,24 @@ class TokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
 
-class UsersSettingsSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(
-        required=False,
+class UserSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(
         max_length=150,
-        allow_null=True,
+        regex=r'^[\w.@+-]+\Z',
+        validators=[
+            UniqueValidator(queryset=User.objects.all()),
+        ],
     )
-    last_name = serializers.CharField(
-        required=False,
-        max_length=150,
-        allow_null=True,
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all()),
+        ],
     )
     role = serializers.ChoiceField(
         choices=['user', 'moderator', 'admin'],
         default='user',
     )
-
-    class Meta:
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role',
-        )
-        model = User
-
-
-class UserMeSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        max_length=150,
-        required=False,
-        regex=r'^[\w.@+-]+\Z',
-    )
-    email = serializers.EmailField(required=False, max_length=254)
-    first_name = serializers.CharField(
-        required=False,
-        max_length=150,
-        allow_null=True,
-    )
-    last_name = serializers.CharField(
-        required=False,
-        max_length=150,
-        allow_null=True,
-    )
-    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User

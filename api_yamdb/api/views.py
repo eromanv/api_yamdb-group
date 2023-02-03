@@ -9,6 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.decorators import action
 
 from api.filters import TitleFilter
 from api.mixins import ListCreateDestroyViewSet
@@ -25,41 +26,40 @@ from api.serializers import (
     TitleReadSerializer,
     TitleWriteSerializer,
     TokenSerializer,
-    UserMeSerializer,
     UserSignupSerializer,
-    UsersSettingsSerializer,
+    UserSerializer,
 )
 from reviews.models import Category, Genre, Review, Title, User
 
 
-class UserMeRetrieveUpdate(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request):
-        user = get_object_or_404(User, email=request.user)
-        serializer = UsersSettingsSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        serializer = UserMeSerializer(
-            request.user,
-            data=request.data,
-            partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class UsersSettingsViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
-    pagination_class = PageNumberPagination
     queryset = User.objects.all()
-    serializer_class = UsersSettingsSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    @action(
+        methods=['GET', 'PATCH'],
+        detail=False,
+        url_path='me',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def me_page(self, request):
+        if request.method == 'GET':
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(role=request.user.role)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSignupViewSet(APIView):

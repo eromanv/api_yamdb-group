@@ -19,4 +19,3 @@ class UserAdmin(admin.ModelAdmin):
     )
     list_filter = ('username',)
     empty_value_display = '-пусто-'
-

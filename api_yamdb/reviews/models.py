@@ -2,6 +2,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+from user.models import User
+
 
 class NameSlug(models.Model):
     name = models.CharField(
@@ -19,7 +21,6 @@ class NameSlug(models.Model):
 
 
 class Genre(NameSlug):
-
     class Meta:
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
@@ -30,7 +31,6 @@ class Genre(NameSlug):
 
 
 class Category(NameSlug):
-
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
@@ -47,9 +47,7 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         verbose_name='Год',
-        validators=(
-            MaxValueValidator(timezone.now().year),
-        ),
+        validators=(MaxValueValidator(timezone.now().year),),
     )
     category = models.ForeignKey(
         Category,
@@ -105,9 +103,7 @@ class TitleGenre(models.Model):
 
 
 class AuthorText(models.Model):
-    text = models.TextField(
-        verbose_name='Текст отзыва'
-    )
+    text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

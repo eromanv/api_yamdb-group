@@ -29,7 +29,6 @@ class User(AbstractUser):
         help_text='Напишите биографию пользователя',
     )
     role = models.CharField(
-
         max_length=9,
         choices=ADMIN_ROLE,
         default=USER,

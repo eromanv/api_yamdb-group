@@ -11,14 +11,15 @@ class User(AbstractUser):
         (ADMIN, 'admin'),
         (MODERATOR, 'moderator'),
     ]
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username',)
 
     email = models.EmailField(
         db_index=True,
         unique=True,
-        max_length=254,
-        verbose_name='Email пользователя',
+        max_length=254,  # странное требование теста
+        verbose_name='Email',
         help_text='Укажите email пользователя',
     )
     bio = models.TextField(
@@ -28,7 +29,8 @@ class User(AbstractUser):
         help_text='Напишите биографию пользователя',
     )
     role = models.CharField(
-        max_length=15,
+
+        max_length=9,
         choices=ADMIN_ROLE,
         default=USER,
         verbose_name='Роль пользователя',

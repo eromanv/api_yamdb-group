@@ -17,10 +17,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'behaviors.apps.BehaviorsConfig',
     'rest_framework_simplejwt',
     'rest_framework',
     'django_filters',
+    'user',
     'reviews',
     'api',
 ]
@@ -98,7 +98,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'user.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 

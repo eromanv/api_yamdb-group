@@ -173,7 +173,7 @@ class AuthorText(models.Model):
         abstract = True
 
 
-class Review(AuthorText, Timestamped):
+class Review(AuthorText):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -183,12 +183,13 @@ class Review(AuthorText, Timestamped):
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         verbose_name='Оценка',
     )
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         default_related_name = 'reviews'
-        ordering = ('created',)
+        ordering = ('pub_date',)
         constraints = [
             models.UniqueConstraint(
                 fields=('author', 'title'),
@@ -200,18 +201,19 @@ class Review(AuthorText, Timestamped):
         return self.text
 
 
-class Comment(AuthorText, Timestamped):
+class Comment(AuthorText):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
     )
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'
-        ordering = ('created',)
+        ordering = ('pub_date',)
 
     def __str__(self):
         return self.text

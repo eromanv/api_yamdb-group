@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from reviews.models import Category, Comment, Genre, Review, Title, User, GenreTitle
+from reviews.models import Category, Comment, Genre, Review, Title, User, TitleGenre
 
 
 @admin.register(User)
@@ -62,7 +62,7 @@ class CommentAdmin(admin.ModelAdmin):
         'text',
         'review',
         'author',
-        'created',
+        'pub_date',
     )
     search_fields = ('review',)
     list_filter = ('review',)
@@ -76,8 +76,8 @@ class ReviewAdmin(admin.ModelAdmin):
         'title',
         'author',
         'score',
-        'created',
+        'pub_date',
     )
-    search_fields = ('created',)
-    list_filter = ('created',)
+    search_fields = ('pub_date',)
+    list_filter = ('pub_date',)
     empty_value_display = '-пусто-'

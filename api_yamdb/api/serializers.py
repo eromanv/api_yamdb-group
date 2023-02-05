@@ -28,29 +28,30 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         slug_field='slug',
         many=True,
         queryset=Genre.objects.all(),
-        required=True,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
-        required=True,
     )
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'category',
+            'genre'
+        )
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
+    category = CategorySerializer()
     genre = GenreSerializer(
-        read_only=True,
         many=True,
     )
-    rating = serializers.IntegerField(
-        source='reviews__score__avg',
-        read_only=True,
-    )
+    rating = serializers.FloatField()
 
     class Meta:
         fields = (
@@ -58,11 +59,12 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'name',
             'year',
             'description',
-            'genre',
-            'category',
             'rating',
+            'category',
+            'genre'
         )
         model = Title
+        read_only_fields = ('category', 'genre', 'rating')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -77,7 +79,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    score = serializers.IntegerField(min_value=1, max_value=10)
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
@@ -88,13 +89,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
     def validate(self, attrs):
-        if not self.context['request'].method == 'POST':
-            return attrs
-        if Review.objects.filter(
-            title_id=self.context['view'].kwargs.get('title_id'),
-            author=self.context['request'].user,
-        ).exists():
-            raise serializers.ValidationError(
-                'Попытка оставить повторный отзыв',
-            )
+        if self.context['request'].method == 'POST':
+            if Review.objects.filter(
+                title_id=self.context['view'].kwargs.get('title_id'),
+                author=self.context['request'].user,
+            ).exists():
+                raise serializers.ValidationError(
+                    'Попытка оставить повторный отзыв',
+                )
         return attrs

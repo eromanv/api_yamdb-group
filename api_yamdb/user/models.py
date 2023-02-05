@@ -24,7 +24,6 @@ class User(AbstractUser):
     )
     bio = models.TextField(
         blank=True,
-        null=True,
         verbose_name='Биография пользователя',
         help_text='Напишите биографию пользователя',
     )
@@ -38,16 +37,14 @@ class User(AbstractUser):
     first_name = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
-        null=True,
     )
     last_name = models.CharField(
         verbose_name='Фамилия пользователя',
         max_length=150,
-        null=True,
     )
 
     class Meta:
-        verbose_name = 'Пользователи'
+        verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
     @property

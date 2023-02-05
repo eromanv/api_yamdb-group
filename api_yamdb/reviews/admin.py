@@ -1,32 +1,30 @@
 from django.contrib import admin
-
+from api_yamdb.admin import BaseAdmin
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(BaseAdmin):
     list_display = (
         'name',
         'slug',
     )
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Genre)
-class GenreAdmin(admin.ModelAdmin):
+class GenreAdmin(BaseAdmin):
     list_display = (
         'name',
         'slug',
     )
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Title)
-class TitleAdmin(admin.ModelAdmin):
+class TitleAdmin(BaseAdmin):
     list_display = (
         'name',
         'year',
@@ -35,11 +33,10 @@ class TitleAdmin(admin.ModelAdmin):
     )
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(BaseAdmin):
     list_display = (
         'text',
         'review',
@@ -48,11 +45,10 @@ class CommentAdmin(admin.ModelAdmin):
     )
     search_fields = ('review',)
     list_filter = ('review',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
+class ReviewAdmin(BaseAdmin):
     list_display = (
         'text',
         'title',
@@ -62,4 +58,3 @@ class ReviewAdmin(admin.ModelAdmin):
     )
     search_fields = ('pub_date',)
     list_filter = ('pub_date',)
-    empty_value_display = '-пусто-'

@@ -1,11 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
-
-<<<<<<< HEAD
-=======
 from user.models import User
->>>>>>> e1c659a94a5974379cf92da9ed16ee9e6fdff0d0
 
 
 class NameSlug(models.Model):

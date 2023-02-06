@@ -1,6 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+
 from user.models import User
 
 
@@ -121,8 +122,8 @@ class Review(AuthorText):
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
+        verbose_name = 'отзыв'
+        verbose_name_plural = 'отзывы'
         default_related_name = 'reviews'
         ordering = ('pub_date',)
         constraints = [
@@ -145,8 +146,8 @@ class Comment(AuthorText):
     pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'комментарии'
         default_related_name = 'comments'
         ordering = ('pub_date',)
 

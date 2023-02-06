@@ -1,10 +1,11 @@
 from django.contrib import admin
 
+from api_yamdb.admin import BaseAdmin
 from user.models import User
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(BaseAdmin):
     list_display = (
         'username',
         'email',

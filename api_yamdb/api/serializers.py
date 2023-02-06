@@ -36,14 +36,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id',
-            'name',
-            'year',
-            'description',
-            'category',
-            'genre'
-        )
+        fields = ('id', 'name', 'year', 'description', 'category', 'genre')
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
@@ -61,7 +54,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'description',
             'rating',
             'category',
-            'genre'
+            'genre',
         )
         model = Title
         read_only_fields = ('category', 'genre', 'rating')

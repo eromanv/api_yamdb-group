@@ -14,13 +14,13 @@ from user.serializers import AuthSerializer, TokenSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    lookup_field = 'username'
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
+    lookup_field = 'username'
+    permission_classes = (IsAdmin,)
+    search_fields = ('username',)
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
     @action(
         methods=['GET', 'PATCH'],

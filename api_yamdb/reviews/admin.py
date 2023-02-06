@@ -1,6 +1,7 @@
 from django.contrib import admin
+
 from api_yamdb.admin import BaseAdmin
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 
 
 @admin.register(Category)
@@ -21,6 +22,22 @@ class GenreAdmin(BaseAdmin):
     )
     search_fields = ('name',)
     list_filter = ('name',)
+
+
+@admin.register(TitleGenre)
+class TitleGenreAdmin(BaseAdmin):
+    list_display = (
+        'title',
+        'genre',
+    )
+    search_fields = (
+        'title',
+        'genre',
+    )
+    list_filter = (
+        'title',
+        'genre',
+    )
 
 
 @admin.register(Title)

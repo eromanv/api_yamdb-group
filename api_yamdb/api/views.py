@@ -1,6 +1,6 @@
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, viewsets
+from rest_framework import filters, generics, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
 
 from api.serializers import (
@@ -20,22 +20,21 @@ from reviews.filters import TitleFilter
 from reviews.models import Category, Genre, Review, Title
 
 
-class CategoryViewSet(ListCreateDestroyViewSet):
+class CategoryGenreCommonViewSet(ListCreateDestroyViewSet):
+    permission_classes = (IsAdminUserOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class CategoryViewSet(CategoryGenreCommonViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
-class GenreViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(CategoryGenreCommonViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -46,7 +45,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
+        if self.request.method in permissions.SAFE_METHODS:
             return TitleReadSerializer
         return TitleWriteSerializer
 
@@ -56,19 +55,18 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOwnerModeratorOrReadOnly,)
 
-    def get_queryset(self):
+    def get_title(self):
         title = generics.get_object_or_404(
             Title,
             id=self.kwargs.get('title_id'),
         )
-        return title.reviews.select_related('author').all()
+        return title
+
+    def get_queryset(self):
+        return self.get_title().reviews.select_related('author').all()
 
     def perform_create(self, serializer):
-        title = generics.get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'),
-        )
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -76,16 +74,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOwnerModeratorOrReadOnly,)
 
-    def get_queryset(self):
+    def get_review(self):
         review = generics.get_object_or_404(
             Review,
             id=self.kwargs.get('review_id'),
         )
-        return review.comments.select_related('author').all()
+        return review
+
+    def get_queryset(self):
+        return self.get_review().comments.select_related('author').all()
 
     def perform_create(self, serializer):
-        review = generics.get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id'),
-        )
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user, review=self.get_review())

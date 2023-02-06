@@ -8,10 +8,9 @@ from api.views import (
     ReviewViewSet,
     TitleViewSet,
 )
-from user.views import AuthViewSet, UserTokenViewSet, UserViewSet
 
 router = DefaultRouter()
-router.register('users', UserViewSet)
+
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
 router.register('titles', TitleViewSet, basename='titles')
@@ -27,7 +26,5 @@ router.register(
 )
 
 urlpatterns = [
-    path('auth/signup/', AuthViewSet.as_view()),
-    path('auth/token/', UserTokenViewSet.as_view()),
     path('', include(router.urls)),
 ]

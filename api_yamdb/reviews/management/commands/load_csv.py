@@ -6,7 +6,7 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: C901
         for row in csv.DictReader(
             open('./static/data/category.csv', encoding='utf8'),
         ):

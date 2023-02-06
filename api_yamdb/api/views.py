@@ -1,22 +1,8 @@
-from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import AccessToken
 
-from api.filters import TitleFilter
-from api.mixins import ListCreateDestroyViewSet
-from api.permissions import (
-    IsAdmin,
-    IsAdminOwnerModeratorOrReadOnly,
-    IsAdminUserOrReadOnly,
-)
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -24,121 +10,42 @@ from api.serializers import (
     ReviewSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
-    TokenSerializer,
-    UserMeSerializer,
-    UserSignupSerializer,
-    UsersSettingsSerializer,
 )
-from reviews.models import Category, Genre, Review, Title, User
+from api_yamdb.mixins import ListCreateDestroyViewSet
+from api_yamdb.permissions import (
+    IsAdminOwnerModeratorOrReadOnly,
+    IsAdminUserOrReadOnly,
+)
+from reviews.filters import TitleFilter
+from reviews.models import Category, Genre, Review, Title
 
 
-class UserMeRetrieveUpdate(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request):
-        user = get_object_or_404(User, email=request.user)
-        serializer = UsersSettingsSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        serializer = UserMeSerializer(
-            request.user,
-            data=request.data,
-            partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class UsersSettingsViewSet(viewsets.ModelViewSet):
-    lookup_field = 'username'
-    pagination_class = PageNumberPagination
-    queryset = User.objects.all()
-    serializer_class = UsersSettingsSerializer
-    permission_classes = (IsAdmin,)
+class CategoryGenreCommonViewSet(ListCreateDestroyViewSet):
+    permission_classes = (IsAdminUserOrReadOnly,)
+    lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    search_fields = ('name',)
 
 
-class UserSignupViewSet(APIView):
-    permission_classes = (permissions.AllowAny,)
-
-    def send_token(self, user, username, email):
-        token = default_token_generator.make_token(user)
-        send_mail(
-            'confirmation_code',
-            token,
-            settings.DEFAULT_FROM_EMAIL,
-            (email,),
-        )
-
-    def post(self, request):
-        serializer = UserSignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        email = serializer.validated_data['email']
-        user, create = User.objects.get_or_create(
-            username=username,
-            email=email,
-        )
-        if create:
-            user.save()
-        self.send_token(user, username, email)
-        return Response(
-            {'username': username, 'email': email},
-            status=status.HTTP_200_OK,
-        )
-
-
-class UserTokenViewSet(APIView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request):
-        serializer = TokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, username=request.data['username'])
-
-        if default_token_generator.check_token(
-            user,
-            request.data['confirmation_code'],
-        ):
-            token = AccessToken.for_user(user)
-            return Response({'token': str(token)}, status=status.HTTP_200_OK)
-        return Response(
-            {'Ошибка генерации токена'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-
-class CategoryViewSet(ListCreateDestroyViewSet):
+class CategoryViewSet(CategoryGenreCommonViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
-class GenreViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(CategoryGenreCommonViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
     serializer_class = TitleWriteSerializer
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
+        if self.request.method in permissions.SAFE_METHODS:
             return TitleReadSerializer
         return TitleWriteSerializer
 
@@ -148,19 +55,18 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOwnerModeratorOrReadOnly,)
 
-    def get_queryset(self):
+    def get_title(self):
         title = generics.get_object_or_404(
             Title,
             id=self.kwargs.get('title_id'),
         )
-        return title.reviews.select_related('author').all()
+        return title
+
+    def get_queryset(self):
+        return self.get_title().reviews.select_related('author').all()
 
     def perform_create(self, serializer):
-        title = generics.get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'),
-        )
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -168,16 +74,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOwnerModeratorOrReadOnly,)
 
-    def get_queryset(self):
+    def get_review(self):
         review = generics.get_object_or_404(
             Review,
             id=self.kwargs.get('review_id'),
         )
-        return review.comments.select_related('author').all()
+        return review
+
+    def get_queryset(self):
+        return self.get_review().comments.select_related('author').all()
 
     def perform_create(self, serializer):
-        review = generics.get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id'),
-        )
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user, review=self.get_review())

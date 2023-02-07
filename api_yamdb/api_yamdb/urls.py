@@ -3,8 +3,8 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 apipatterns = [
-     path('', include('user.urls')),
-     path('', include('reviews.urls')),
+    path('', include('user.urls')),
+    path('', include('reviews.urls')),
 ]
 
 urlpatterns = [

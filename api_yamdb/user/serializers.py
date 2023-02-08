@@ -5,7 +5,7 @@ from user.models import User
 from api_yamdb.mixins import UsernameSerializer
 
 
-class AuthSerializer(serializers.ModelSerializer, UsernameSerializer):
+class AuthSerializer(serializers.Serializer, UsernameSerializer):
     username = serializers.SlugField(max_length=150)
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -14,7 +14,7 @@ class AuthSerializer(serializers.ModelSerializer, UsernameSerializer):
         fields = ('email', 'username')
 
 
-class TokenSerializer(serializers.Serializer):
+class TokenSerializer(serializers.Serializer, UsernameSerializer):
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=150)
 

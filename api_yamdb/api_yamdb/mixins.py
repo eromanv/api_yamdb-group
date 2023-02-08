@@ -26,6 +26,3 @@ class UsernameSerializer(BaseSerializer):
 
     def validate_username(self, username):
         return validate_username(username)
-
-    def validate_email(self, email):
-        return validate_email(email)

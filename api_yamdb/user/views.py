@@ -6,7 +6,7 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 
 from rest_framework.exceptions import ValidationError
@@ -81,15 +81,13 @@ class UserTokenView(APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, username=request.data['username'])
-
-        if default_token_generator.check_token(
-            user,
-            request.data['confirmation_code'],
-        ):
-            token = AccessToken.for_user(user)
-            return Response({'token': serializer.data.get('token')}, status=status.HTTP_200_OK)
-        return Response(
-            {'Ошибка генерации токена'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        username = serializer.validated_data.get('username')
+        user = get_object_or_404(User, username=username)
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        if not default_token_generator.check_token(user, confirmation_code):
+            return Response(
+                {'Вы использовали неверный код подтверждения.'},
+                status=status.HTTP_400_BAD_REQUEST)
+        token = RefreshToken.for_user(user)
+        return Response({'token': str(token.access_token)},
+                        status=status.HTTP_200_OK)

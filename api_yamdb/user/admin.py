@@ -19,4 +19,3 @@ class UserAdmin(BaseAdmin):
         'role',
     )
     list_filter = ('username',)
-    empty_value_display = '-пусто-'

@@ -6,9 +6,12 @@ from user.views import AuthViewSet, UserTokenViewSet, UserViewSet
 router = DefaultRouter()
 router.register('users', UserViewSet)
 
+authpatterns = [
+    path('signup/', AuthViewSet.as_view()),
+    path('token/', UserTokenViewSet.as_view()),
+]
 
 urlpatterns = [
-    path('auth/signup/', AuthViewSet.as_view()),
-    path('auth/token/', UserTokenViewSet.as_view()),
+    path('auth/', include(authpatterns)),
     path('', include(router.urls)),
 ]

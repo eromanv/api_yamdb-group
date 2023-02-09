@@ -2,18 +2,17 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.serializers import BaseSerializer
 
+from user.validators import validate_username
+
 from .permissions import IsAdminOwnerModeratorOrReadOnly
-from user.validators import validate_username, validate_email
 
 
-class ListCreateDestroyViewSet(mixins.CreateModelMixin,
-                               mixins.ListModelMixin,
-                               mixins.DestroyModelMixin,
-                               viewsets.GenericViewSet):
-    """Вьюсет для POST, GET и DELETE запросов.
-    Поддерживает url с динамической переменной slug.
-    """
-
+class ListCreateDestroyViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     permission_classes = (IsAdminOwnerModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
@@ -22,7 +21,5 @@ class ListCreateDestroyViewSet(mixins.CreateModelMixin,
 
 
 class UsernameSerializer(BaseSerializer):
-    """Сериализатор для username."""
-
     def validate_username(self, username):
         return validate_username(username)

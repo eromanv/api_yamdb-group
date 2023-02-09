@@ -1,6 +1,6 @@
-from rest_framework import serializers
 from django.core.validators import MaxValueValidator
 from django.utils import timezone
+from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -32,7 +32,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     year = serializers.IntegerField(
         validators=[
             MaxValueValidator(timezone.now().year),
-        ]
+        ],
     )
 
     class Meta:

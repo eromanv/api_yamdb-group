@@ -14,13 +14,6 @@ class ReadOnly(permissions.BasePermission):
 
 
 class IsAdminOwnerModeratorOrReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        del view
-        return (
-            request.method in permissions.SAFE_METHODS
-            or request.user.is_authenticated
-        )
-
     def has_object_permission(self, request, view, obj):
         del view
         return (

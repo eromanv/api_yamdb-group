@@ -4,12 +4,10 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db import IntegrityError
-
-from rest_framework.exceptions import ValidationError
 
 from api_yamdb.permissions import IsAdmin
 from user.models import User
@@ -20,7 +18,10 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     http_method_names = ['get', 'post', 'patch', 'delete']
     lookup_field = 'username'
-    permission_classes = (IsAdmin,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+        IsAdmin,
+    )
     queryset = User.objects.all()
     search_fields = ('username',)
     serializer_class = UserSerializer
@@ -32,7 +33,10 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         if request.method == 'GET':
-            return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+            return Response(
+                UserSerializer(request.user).data,
+                status=status.HTTP_200_OK,
+            )
 
         serializer = UserSerializer(
             request.user,
@@ -87,7 +91,10 @@ class UserTokenView(APIView):
         if not default_token_generator.check_token(user, confirmation_code):
             return Response(
                 {'Вы использовали неверный код подтверждения.'},
-                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         token = RefreshToken.for_user(user)
-        return Response({'token': str(token.access_token)},
-                        status=status.HTTP_200_OK)
+        return Response(
+            {'token': str(token.access_token)},
+            status=status.HTTP_200_OK,
+        )

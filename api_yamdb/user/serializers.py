@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
-from user.models import User
 from api_yamdb.mixins import UsernameSerializer
+from user.models import User
 
 
 class AuthSerializer(serializers.Serializer, UsernameSerializer):
@@ -20,20 +19,6 @@ class TokenSerializer(serializers.Serializer, UsernameSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer, UsernameSerializer):
-    username = serializers.RegexField(
-        max_length=150,
-        regex=r'^[\w.@+-]+\Z',
-        validators=[
-            UniqueValidator(queryset=User.objects.all()),
-        ],
-    )
-    email = serializers.EmailField(
-        max_length=254,
-        validators=[
-            UniqueValidator(queryset=User.objects.all()),
-        ],
-    )
-
     class Meta:
         model = User
         fields = (

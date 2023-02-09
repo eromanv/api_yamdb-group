@@ -1,3 +1,5 @@
+from django.core.validators import MaxValueValidator
+from django.utils import timezone
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -6,20 +8,14 @@ from reviews.models import Category, Comment, Genre, Review, Title
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = (
-            'name',
-            'slug',
-        )
+        fields = ('name', 'slug')
         lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = (
-            'name',
-            'slug',
-        )
+        fields = ('name', 'slug')
         lookup_field = 'slug'
 
 
@@ -32,6 +28,11 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
+    )
+    year = serializers.IntegerField(
+        validators=[
+            MaxValueValidator(timezone.now().year),
+        ],
     )
 
     class Meta:

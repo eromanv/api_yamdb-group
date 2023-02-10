@@ -72,8 +72,6 @@ class AuthView(APIView):
             )
         except Exception:
             raise ValidationError
-        if created:
-            user.save()
         self.send_token(user, username, email)
         return Response(
             {'username': username, 'email': email},
@@ -85,7 +83,7 @@ class UserTokenView(APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
+        username = serializer.validated_data['username']
         user = get_object_or_404(User, username=username)
         confirmation_code = serializer.validated_data.get('confirmation_code')
         if not default_token_generator.check_token(user, confirmation_code):

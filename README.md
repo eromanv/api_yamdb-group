@@ -18,10 +18,11 @@
 ## Техническое описание проекта
 
 ### Стек технологий использованный в проекте
-- Python 3.10
-- Django 3.2
-- DRF
-- JWT
+
+* Python 3.10
+* Django 3.2
+* DRF
+* JWT
 
 ### Ресурсы API YaMDb
 
@@ -132,6 +133,6 @@ GET /api/v1/users/ - Получение списка всех пользоват
 
 Авторы:
 
-- [Denis Afanasyev](https://github.com/AfonyaTriceps)
-- [Roman Egorov](https://github.com/eromanv)
-- [Denis Larionov](https://github.com/DenisDicsy)
+* [Denis Afanasyev](https://github.com/AfonyaTriceps)
+* [Roman Egorov](https://github.com/eromanv)
+* [Denis Larionov](https://github.com/DenisDicsy)

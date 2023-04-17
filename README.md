@@ -109,4 +109,6 @@ GET /api/v1/users/ - Получение списка всех пользоват
 Авторы:
 
 * [Roman Egorov](https://github.com/eromanv)
+* Денис Афонин
+* 
 
